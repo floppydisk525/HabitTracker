@@ -14,7 +14,7 @@ using (var connection = new SqliteConnection(connectionString))
         Date TEXT,
         Quantity INTEGER
         )";
-
+    //test
     tableCmd.ExecuteNonQuery();
 
     connection.Close();
