@@ -51,16 +51,16 @@ namespace HabitTracker
                         Console.WriteLine("\nGoodbye!\n");
                         closeApp = true;
                         break;
-                    //case 1:
-                    //    GetAllRecords();
-                    //    break;
+                    case "1":
+                        GetAllRecords();
+                        break;
                     case "2":
                         Insert();
                         break;
-                        //case 3:
+                        //case "3":
                         //    Delete();
                         //    break;
-                        //case 4:
+                        //case "4":
                         //    Update();
                         //    break;
                         //default:
@@ -69,6 +69,25 @@ namespace HabitTracker
                 }
             }
         }
+
+        private static void GetAllRecords()
+        {
+            Console.Clear();
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText =
+                    $"SELECT * FROM drinking_water";
+                List<DrinkingWater> tableData = new();
+
+
+                tableCmd.ExecuteNonQuery();
+
+                connection.Close();
+            }
+        }
+
         private static void Insert()
         {
             string date = GetDateInput();
