@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Data.Sqlite;
+using System.Globalization;
 
 namespace HabitTracker
 {
@@ -79,12 +80,37 @@ namespace HabitTracker
                 var tableCmd = connection.CreateCommand();
                 tableCmd.CommandText =
                     $"SELECT * FROM drinking_water";
+                
                 List<DrinkingWater> tableData = new();
+                SqliteDataReader reader = tableCmd.ExecuteReader();
 
-
-                tableCmd.ExecuteNonQuery();
-
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        tableData.Add(
+                        new DrinkingWater 
+                        {
+                            Id = reader.GetInt32(0),
+                            Date = DateTime.ParseExact(reader.GetString(1), "MM-dd-yy", new CultureInfo("en-US")),
+                            Quantity = reader.GetInt32(2)
+                        }); ;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No rows found!");
+                }
+ 
                 connection.Close();
+
+                Console.WriteLine("--------------------------------------------\n");
+                Console.WriteLine("Id#  -  Date  -  Quantity\n");
+                foreach (var dw in tableData)
+                {
+                    Console.WriteLine($"{dw.Id} - {dw.Date.ToString("MM-dd-yy")} - {dw.Quantity} glasses");
+                }
+                Console.WriteLine("--------------------------------------------\n");
             }
         }
 
