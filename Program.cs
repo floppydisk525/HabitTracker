@@ -5,10 +5,9 @@ namespace HabitTracker
 {
     internal class Program
     {
+        static string connectionString = @"Data Source=habitTracker.db";
         static void Main(string[] args)
         {
-            string connectionString = @"Data Source=habitTracker.db";
-
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
@@ -74,7 +73,19 @@ namespace HabitTracker
         {
             string date = GetDateInput();
 
-            int quantity = GetNumberInput("\n\nPlease insert numnber of glasses or other measure of your choice (no decimals allowed)\n\n");
+            int quantity = GetNumberInput("\n\nPlease insert numnber of glasses or other measure of your choice (no decimals allowed):");
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText =
+                    $"INSERT INTO drinking_water(date, quantity) VALUES('{date}', {quantity})";
+
+                tableCmd.ExecuteNonQuery();
+
+                connection.Close();
+            }
 
         }
 
@@ -89,7 +100,7 @@ namespace HabitTracker
 
         internal static string GetDateInput()
         {
-            Console.WriteLine("\n\nPlease insert the date: (Format: dd-mm-yy).  Type 0 to return to the main menu.");
+            Console.WriteLine("\n\nPlease insert the date: (Format: mm-dd-yy).  Type 0 to return to the main menu.");
 
             string dateInput = Console.ReadLine();
 
