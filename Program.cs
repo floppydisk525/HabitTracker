@@ -51,6 +51,7 @@ namespace HabitTracker
                     case "0":
                         Console.WriteLine("\nGoodbye!\n");
                         closeApp = true;
+                        Environment.Exit(0);
                         break;
                     case "1":
                         GetAllRecords();
@@ -58,15 +59,15 @@ namespace HabitTracker
                     case "2":
                         Insert();
                         break;
-                        //case "3":
-                        //    Delete();
-                        //    break;
-                        //case "4":
-                        //    Update();
-                        //    break;
-                        //default:
-                        //    Console.WriteLine("\nInvalid Entry.  Please Enter an integer between 0 and 4.\n");
-                        //    break;
+                    case "3":
+                        Delete();
+                        break;
+                    case "4":
+                        Update();
+                        break;
+                    default:
+                        Console.WriteLine("\nInvalid Entry.  Please Enter an integer between 0 and 4.\n");
+                        break;
                 }
             }
         }
@@ -131,7 +132,71 @@ namespace HabitTracker
 
                 connection.Close();
             }
+        }
 
+        private static void Delete()
+        {
+            Console.Clear();
+            GetAllRecords();
+
+            var recordId = GetNumberInput("\n\nPlease provide the record ID of the record you want to delete or type 0 to go back to the main menu\n\n");
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText = $"DELETE FROM drinking_water WHERE Id = '{recordId}'";
+
+                int rowCount = tableCmd.ExecuteNonQuery();
+
+                if (rowCount == 0)    //issue w/ this that if we always return 0, will get in infinite loop..
+                {
+                    Console.WriteLine($"\n\nRecord with Id# {recordId} doesn't exist. Please choose again. \n\n");
+                    Task.Delay(2000).Wait();
+                    Delete();           //possible infinite loop 'here'...  
+                }
+            }
+
+            Console.WriteLine($"\n\nRecord with Id# {recordId} has been deleted. \n\n");
+            GetUserInput();
+        }
+
+        private static void Update()
+        {
+            Console.Clear();
+            GetAllRecords();
+
+            var recordId = GetNumberInput("\n\nPlease provide the record ID of the record you want to update or type 0 to go back to the main menu\n\n");
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM drinking_water WHERE Id = {recordId})";
+                int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
+
+                if (checkQuery == 0)
+                {
+                    Console.WriteLine($"\n\nRecord with Id# {recordId} doesn't exist. Please choose again. \n\n");
+                    Task.Delay(2000).Wait();
+                    connection.Close();
+                    Update();
+                }
+
+                string date = GetDateInput();
+
+                int quantity = GetNumberInput("\n\nPlease insert number of glasses or other measure of your choice (no decimals allowed).\n\n");
+
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText = $"UPDATE drinking_water SET date = '{date}', quantity = '{quantity}' WHERE id = {recordId}";
+
+                tableCmd.ExecuteNonQuery();
+                connection.Close();
+            }
+
+            Console.WriteLine($"\n\nRecord with Id# {recordId} has been deleted. \n\n");
+            GetUserInput();
         }
 
         internal static int GetNumberInput(string message)
@@ -139,6 +204,13 @@ namespace HabitTracker
             Console.WriteLine(message);
             string numberInput = Console.ReadLine();
             if (numberInput == "0") GetUserInput();
+
+            while(!Int32.TryParse(numberInput,out _) || Convert.ToInt32(numberInput) < 0)
+            {
+                Console.WriteLine("\n\nInvalid Number.  Try again.\n\n");
+                numberInput = Console.ReadLine();
+            }
+
             int finalInput = Convert.ToInt32(numberInput);
             return finalInput;
         }
@@ -151,10 +223,14 @@ namespace HabitTracker
 
             if (dateInput == "0") GetUserInput();
 
+            while (!DateTime.TryParseExact(dateInput,"MM-dd-yy",new CultureInfo("en-US"), DateTimeStyles.None,out _))
+            {
+                Console.WriteLine("\n\nInvalid Date.  (Format:  mm-dd-yy).  Type 0 to return to the main menu or try again:\n\n");
+                dateInput = Console.ReadLine();
+            }
+
             return dateInput;
         }
-
     }
-
 
 }
