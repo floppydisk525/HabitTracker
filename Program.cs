@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Data.Sqlite;
 using System.Globalization;
+using ConsoleValidationLibrary;
 
 namespace HabitTracker
 {
@@ -44,7 +45,8 @@ namespace HabitTracker
                 Console.WriteLine("Type 4 to Update a Record.");
                 Console.WriteLine("-----------------------------------------\n");
 
-                string commandInput = Console.ReadLine();
+                //string commandInput = Console.ReadLine();
+                string commandInput = RegexKeyValidate.KeyValidate(@"^[01234]*$");
 
                 switch (commandInput)
                 {
@@ -202,13 +204,15 @@ namespace HabitTracker
         internal static int GetNumberInput(string message)
         {
             Console.WriteLine(message);
-            string numberInput = Console.ReadLine();
+            //string numberInput = Console.ReadLine();
+            string numberInput = RegexKeyValidate.KeyValidate("num");
             if (numberInput == "0") GetUserInput();
 
             while(!Int32.TryParse(numberInput,out _) || Convert.ToInt32(numberInput) < 0)
             {
                 Console.WriteLine("\n\nInvalid Number.  Try again.\n\n");
-                numberInput = Console.ReadLine();
+                //numberInput = Console.ReadLine();
+                numberInput = RegexKeyValidate.KeyValidate("num");
             }
 
             int finalInput = Convert.ToInt32(numberInput);
@@ -219,14 +223,16 @@ namespace HabitTracker
         {
             Console.WriteLine("\n\nPlease insert the date: (Format: mm-dd-yy).  Type 0 to return to the main menu.");
 
-            string dateInput = Console.ReadLine();
+            //string dateInput = Console.ReadLine();
+            string dateInput = RegexKeyValidate.KeyValidate(@"^[0-9-]*$");
 
             if (dateInput == "0") GetUserInput();
 
             while (!DateTime.TryParseExact(dateInput,"MM-dd-yy",new CultureInfo("en-US"), DateTimeStyles.None,out _))
             {
                 Console.WriteLine("\n\nInvalid Date.  (Format:  mm-dd-yy).  Type 0 to return to the main menu or try again:\n\n");
-                dateInput = Console.ReadLine();
+                //dateInput = Console.ReadLine();
+                dateInput = RegexKeyValidate.KeyValidate(@"^[0-9-]*$");
             }
 
             return dateInput;
